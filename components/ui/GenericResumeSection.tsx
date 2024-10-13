@@ -1,4 +1,3 @@
-"use client";
 import React from "react";
 import { useForm, useFieldArray, FieldValues } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -46,6 +45,7 @@ interface GenericResumeSectionProps {
 	schema: z.ZodType<any, any>;
 	defaultValues: any;
 	onSubmit: (values: any) => void;
+	onDelete: (id: string) => Promise<void>;
 	labelOverrides?: {
 		title?: string;
 		organization?: string;
@@ -58,6 +58,7 @@ export default function GenericResumeSection({
 	schema,
 	defaultValues,
 	onSubmit,
+	onDelete,
 	labelOverrides = {},
 }: GenericResumeSectionProps) {
 	const form = useForm<FieldValues>({
@@ -69,6 +70,16 @@ export default function GenericResumeSection({
 		control: form.control,
 		name: "items",
 	});
+
+	const hasItems = fields.length > 0;
+
+	const handleDelete = async (index: number) => {
+		const item = form.getValues(`items.${index}`);
+		if (item._id) {
+			await onDelete(item._id);
+		}
+		remove(index);
+	};
 
 	return (
 		<>
@@ -304,7 +315,7 @@ export default function GenericResumeSection({
 							<Button
 								variant="destructive"
 								type="button"
-								onClick={() => remove(index)}
+								onClick={() => handleDelete(index)}
 								className="mt-4 w-fit"
 							>
 								Remove Item
@@ -332,8 +343,12 @@ export default function GenericResumeSection({
 					</div>
 
 					<div className="mt-8 col-span-full justify-center items-center flex">
-						<Button type="submit" className="w-full h-full">
-							Update {title}
+						<Button
+							type="submit"
+							className="w-full h-full"
+							disabled={!hasItems}
+						>
+							{hasItems ? `Update ${title}` : `No ${title} to Update`}
 						</Button>
 					</div>
 				</form>

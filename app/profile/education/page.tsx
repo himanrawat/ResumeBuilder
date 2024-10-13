@@ -1,4 +1,3 @@
-// File: app/profile/education/page.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -8,6 +7,7 @@ import { z } from "zod";
 const educationSchema = z.object({
 	items: z.array(
 		z.object({
+			_id: z.string().optional(), // MongoDB ID
 			title: z.string().min(2, { message: "Degree is required" }),
 			organization: z.string().min(2, { message: "Institution is required" }),
 			location: z.object({
@@ -31,17 +31,30 @@ const educationSchema = z.object({
 type EducationFormValues = z.infer<typeof educationSchema>;
 
 export default function Education() {
-	const [defaultValues, setDefaultValues] = useState<EducationFormValues>({
+	const [educations, setEducations] = useState<EducationFormValues>({
 		items: [],
 	});
+	const [isLoading, setIsLoading] = useState(true);
+
+	const fetchEducations = async () => {
+		setIsLoading(true);
+		try {
+			const response = await fetch("/api/education");
+			if (response.ok) {
+				const data = await response.json();
+				setEducations({ items: data });
+			} else {
+				console.error("Failed to fetch educations");
+			}
+		} catch (error) {
+			console.error("Error fetching educations:", error);
+		} finally {
+			setIsLoading(false);
+		}
+	};
 
 	useEffect(() => {
-		fetch("/api/education")
-			.then((response) => response.json())
-			.then((data) => {
-				setDefaultValues({ items: data });
-			})
-			.catch((error) => console.error("Error fetching education:", error));
+		fetchEducations();
 	}, []);
 
 	const onSubmit = async (values: EducationFormValues) => {
@@ -56,28 +69,53 @@ export default function Education() {
 
 			if (response.ok) {
 				console.log("Education added successfully");
-				// You can add a success message or refresh the data here
+				await fetchEducations(); // Refresh the data after successful submission
 			} else {
 				console.error("Failed to add education");
-				// You can add an error message here
 			}
 		} catch (error) {
 			console.error("Error adding education:", error);
-			// You can add an error message here
+		}
+	};
+
+	const onDelete = async (id: string) => {
+		try {
+			const response = await fetch(
+				`/api/delete?collection=education&id=${id}`,
+				{
+					method: "DELETE",
+				}
+			);
+
+			if (response.ok) {
+				console.log("Education deleted successfully");
+				await fetchEducations(); // Refresh the data after successful deletion
+			} else {
+				console.error("Failed to delete education");
+			}
+		} catch (error) {
+			console.error("Error deleting education:", error);
 		}
 	};
 
 	return (
-		<GenericResumeSection
-			title="Education"
-			schema={educationSchema}
-			defaultValues={defaultValues}
-			onSubmit={onSubmit}
-			labelOverrides={{
-				title: "Degree",
-				organization: "Institution",
-				current: "I am currently studying here",
-			}}
-		/>
+		<div>
+			{isLoading ? (
+				<p>Loading...</p>
+			) : (
+				<GenericResumeSection
+					title="Education"
+					schema={educationSchema}
+					defaultValues={educations}
+					onSubmit={onSubmit}
+					onDelete={onDelete}
+					labelOverrides={{
+						title: "Degree",
+						organization: "Institution",
+						current: "I am currently studying here",
+					}}
+				/>
+			)}
+		</div>
 	);
 }
