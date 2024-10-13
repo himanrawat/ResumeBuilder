@@ -1,4 +1,4 @@
-import React, { KeyboardEvent } from "react";
+import React, { KeyboardEvent, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import {
 	FormControl,
@@ -8,6 +8,7 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { ProfileFormValues } from "./schema";
 
 interface SkillsProps {
@@ -15,23 +16,43 @@ interface SkillsProps {
 }
 
 const Skills: React.FC<SkillsProps> = ({ form }) => {
-	const addSkill = (skill: string) => {
-		const trimmedSkill = skill.trim();
-		if (trimmedSkill) {
-			const currentSkills = form.getValues().skills;
-			if (!currentSkills.includes(trimmedSkill)) {
-				form.setValue("skills", [...currentSkills, trimmedSkill]);
-			}
+	const [inputValue, setInputValue] = useState("");
+
+	const normalizeSkill = (skill: string): string => {
+		return skill.trim().toLowerCase();
+	};
+
+	const addSkills = (skillsString: string) => {
+		const skillsArray = skillsString
+			.split(",")
+			.map((skill) => skill.trim())
+			.filter(Boolean);
+		const currentSkills = form.getValues().skills;
+		const normalizedCurrentSkills = currentSkills.map(normalizeSkill);
+
+		const newUniqueSkills = skillsArray.filter(
+			(skill) => !normalizedCurrentSkills.includes(normalizeSkill(skill))
+		);
+
+		if (newUniqueSkills.length > 0) {
+			form.setValue("skills", [...currentSkills, ...newUniqueSkills]);
 		}
+		setInputValue("");
 	};
 
 	const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
 		if (event.key === "Enter") {
 			event.preventDefault();
-			const input = event.currentTarget;
-			addSkill(input.value);
-			input.value = "";
+			addSkills(inputValue);
 		}
+	};
+
+	const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		setInputValue(event.target.value);
+	};
+
+	const handleAddClick = () => {
+		addSkills(inputValue);
 	};
 
 	const deleteSkill = (indexToRemove: number) => {
@@ -50,14 +71,24 @@ const Skills: React.FC<SkillsProps> = ({ form }) => {
 				name="skills"
 				render={() => (
 					<FormItem>
-						<FormControl>
-							<Input
-								placeholder="Enter a skill and press Enter"
-								onKeyDown={handleKeyDown}
-							/>
-						</FormControl>
+						<div className="flex space-x-2">
+							<FormControl>
+								<Input
+									placeholder="Enter skills (comma-separated)"
+									onKeyDown={handleKeyDown}
+									onChange={handleInputChange}
+									value={inputValue}
+								/>
+							</FormControl>
+							<Button type="button" onClick={handleAddClick}>
+								Add
+							</Button>
+						</div>
 						<FormDescription>
-							Press Enter to add each skill. Click on a skill to remove it.
+							Enter skills separated by commas, then press Enter or click Add.
+							Skills are case-insensitive (e.g., "JavaScript" and "javascript"
+							are treated as the same). Duplicate skills will be ignored. Click
+							on a skill to remove it.
 						</FormDescription>
 						<FormMessage />
 					</FormItem>
