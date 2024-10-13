@@ -15,7 +15,7 @@ export const profileSchema = z.object({
 		.max(15, { message: "Phone number must be at most 15 digits" }),
 	email: z.string().email({ message: "Invalid email address" }),
 	professionalSummary: z.string().min(100, { message: "Express yourself" }),
-	picture: z.any().optional(),
+	picture: z.string().nullable().optional(),
 	socialMedia: z
 		.array(
 			z.object({

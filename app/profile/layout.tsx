@@ -13,7 +13,7 @@ export default function ProfileLayout({
 		<>
 			<div className="mb-4 md:mb-8">
 				<h1 className="lg:text-9xl md:text-6xl text-4xl">Profile</h1>
-				<p>Mange your Profile</p>
+				<p>Manage your Profile</p>
 			</div>
 			<div className="grid w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
 				<div className="hidden md:block">
@@ -38,7 +38,6 @@ export default function ProfileLayout({
 								>
 									Work Experience
 								</Link>
-
 								<Link
 									href="/profile/education"
 									className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary ${
@@ -57,7 +56,7 @@ export default function ProfileLayout({
 											: ""
 									}`}
 								>
-									Others
+									Other Sections
 								</Link>
 							</nav>
 						</div>

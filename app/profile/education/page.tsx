@@ -1,5 +1,7 @@
-"use client"; // Add this line
-import React from "react";
+// File: app/profile/education/page.tsx
+"use client";
+
+import React, { useEffect, useState } from "react";
 import GenericResumeSection from "@/components/ui/GenericResumeSection";
 import { z } from "zod";
 
@@ -29,23 +31,40 @@ const educationSchema = z.object({
 type EducationFormValues = z.infer<typeof educationSchema>;
 
 export default function Education() {
-	const defaultValues: EducationFormValues = {
-		items: [
-			{
-				title: "",
-				organization: "",
-				location: { city: "", state: "" },
-				description: "",
-				startDate: { month: "", year: "" },
-				endDate: { month: "", year: "" },
-				current: false,
-			},
-		],
-	};
+	const [defaultValues, setDefaultValues] = useState<EducationFormValues>({
+		items: [],
+	});
 
-	const onSubmit = (values: EducationFormValues) => {
-		console.log(values);
-		// Handle form submission
+	useEffect(() => {
+		fetch("/api/education")
+			.then((response) => response.json())
+			.then((data) => {
+				setDefaultValues({ items: data });
+			})
+			.catch((error) => console.error("Error fetching education:", error));
+	}, []);
+
+	const onSubmit = async (values: EducationFormValues) => {
+		try {
+			const response = await fetch("/api/education", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(values.items[values.items.length - 1]),
+			});
+
+			if (response.ok) {
+				console.log("Education added successfully");
+				// You can add a success message or refresh the data here
+			} else {
+				console.error("Failed to add education");
+				// You can add an error message here
+			}
+		} catch (error) {
+			console.error("Error adding education:", error);
+			// You can add an error message here
+		}
 	};
 
 	return (

@@ -1,5 +1,7 @@
-"use client"; // Add this line
-import React from "react";
+// File: app/profile/experience/page.tsx
+"use client";
+
+import React, { useEffect, useState } from "react";
 import { z } from "zod";
 import GenericResumeSection from "@/components/ui/GenericResumeSection";
 
@@ -29,23 +31,42 @@ const workExperienceSchema = z.object({
 type WorkExperienceFormValues = z.infer<typeof workExperienceSchema>;
 
 export default function WorkExperience() {
-	const defaultValues: WorkExperienceFormValues = {
-		items: [
-			{
-				title: "",
-				organization: "",
-				location: { city: "", state: "" },
-				description: "",
-				startDate: { month: "", year: "" },
-				endDate: { month: "", year: "" },
-				current: false,
-			},
-		],
-	};
+	const [defaultValues, setDefaultValues] = useState<WorkExperienceFormValues>({
+		items: [],
+	});
 
-	const onSubmit = (values: WorkExperienceFormValues) => {
-		console.log(values);
-		// Handle form submission
+	useEffect(() => {
+		fetch("/api/experience")
+			.then((response) => response.json())
+			.then((data) => {
+				setDefaultValues({ items: data });
+			})
+			.catch((error) =>
+				console.error("Error fetching work experience:", error)
+			);
+	}, []);
+
+	const onSubmit = async (values: WorkExperienceFormValues) => {
+		try {
+			const response = await fetch("/api/experience", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(values.items[values.items.length - 1]),
+			});
+
+			if (response.ok) {
+				console.log("Work experience added successfully");
+				// You can add a success message or refresh the data here
+			} else {
+				console.error("Failed to add work experience");
+				// You can add an error message here
+			}
+		} catch (error) {
+			console.error("Error adding work experience:", error);
+			// You can add an error message here
+		}
 	};
 
 	return (

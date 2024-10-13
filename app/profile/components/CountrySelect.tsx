@@ -1,3 +1,5 @@
+// File: app/profile/components/CountrySelect.tsx
+
 import React, { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import {
@@ -7,7 +9,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { Country } from "../data/countries"; // Update this import path as needed
+import { Country } from "../data/countries"; // Make sure this path is correct
 
 interface CountrySelectProps {
 	countries: Country[];
@@ -38,7 +40,13 @@ export const CountrySelect: React.FC<CountrySelectProps> = ({
 
 	return (
 		<Select
-			value={value}
+			value={
+				value
+					? getUniqueValue(
+							countries.find((c) => c.code === value) || countries[0]
+					  )
+					: ""
+			}
 			onValueChange={(newValue) => onChange(getDisplayValue(newValue))}
 		>
 			<SelectTrigger className="w-full">

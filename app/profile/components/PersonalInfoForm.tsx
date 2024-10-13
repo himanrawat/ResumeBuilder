@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { UseFormReturn } from "react-hook-form";
 import {
 	FormControl,
@@ -18,10 +18,23 @@ interface PersonalInfoFormProps {
 export default function PersonalInfoForm({ form }: PersonalInfoFormProps) {
 	const [imagePreview, setImagePreview] = useState<string | null>(null);
 
+	useEffect(() => {
+		const picture = form.getValues("picture");
+		if (picture && typeof picture === "string") {
+			setImagePreview(picture);
+		}
+	}, [form]);
+
 	const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files?.[0];
 		if (file) {
-			setImagePreview(URL.createObjectURL(file));
+			const reader = new FileReader();
+			reader.onloadend = () => {
+				const base64String = reader.result as string;
+				setImagePreview(base64String);
+				form.setValue("picture", base64String);
+			};
+			reader.readAsDataURL(file);
 		}
 	};
 
@@ -38,7 +51,7 @@ export default function PersonalInfoForm({ form }: PersonalInfoFormProps) {
 								<img
 									src={imagePreview}
 									alt="Profile Preview"
-									className="mt-2 w-24 h-24 rounded-full"
+									className="mt-2 w-24 h-24 rounded-full object-cover"
 								/>
 							)}
 							<FormControl>
@@ -56,7 +69,6 @@ export default function PersonalInfoForm({ form }: PersonalInfoFormProps) {
 					</FormItem>
 				)}
 			/>
-
 			<div className="grid grid-cols-2 gap-2">
 				<FormField
 					name="firstName"

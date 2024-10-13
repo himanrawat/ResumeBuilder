@@ -1,3 +1,5 @@
+// File: app/profile/components/ContactInfoForm.tsx
+
 import React, { useMemo } from "react";
 import { UseFormReturn } from "react-hook-form";
 import {
@@ -25,46 +27,52 @@ export default function ContactInfoForm({ form }: ContactInfoFormProps) {
 	return (
 		<div className="space-y-4">
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
-				<FormField
-					name="phone"
-					control={form.control}
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Phone Number</FormLabel>
-							<div className="flex space-x-2">
-								<FormField
-									name="countryCode"
-									control={form.control}
-									render={({ field: countryField }) => (
-										<FormItem className="">
-											<FormControl>
-												<MemoizedCountrySelect
-													countries={memoizedCountries}
-													value={countryField.value}
-													onChange={countryField.onChange}
-												/>
-											</FormControl>
-										</FormItem>
-									)}
-								/>
-								<FormControl className="flex-grow">
-									<Input
-										placeholder="Phone Number"
-										{...field}
-										inputMode="numeric"
-										pattern="[0-9]*"
-									/>
-								</FormControl>
-							</div>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
+				<div className="grid grid-cols-1 lg:grid-cols-5">
+					<div className="col-span-2">
+						<FormField
+							name="countryCode"
+							control={form.control}
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Country Code</FormLabel>
+									<FormControl>
+										<MemoizedCountrySelect
+											countries={memoizedCountries}
+											value={field.value}
+											onChange={field.onChange}
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+					</div>
+					<div className="col-span-3">
+						<FormField
+							name="phone"
+							control={form.control}
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Phone Number</FormLabel>
+									<FormControl>
+										<Input
+											placeholder="Phone Number"
+											{...field}
+											inputMode="numeric"
+											pattern="[0-9]*"
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+					</div>
+				</div>
 				<FormField
 					name="email"
 					control={form.control}
 					render={({ field }) => (
-						<FormItem className="col-span-2">
+						<FormItem>
 							<FormLabel>Email</FormLabel>
 							<FormControl>
 								<Input type="email" placeholder="Email" {...field} />

@@ -3,7 +3,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
 import {
 	IconArrowLeft,
@@ -15,6 +15,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { Toaster } from "@/components/ui/toaster";
 
 const geistSans = localFont({
 	src: "./fonts/GeistVF.woff",
@@ -93,6 +94,23 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	const [open, setOpen] = React.useState(false);
+	const [userImage, setUserImage] = useState<string | null>(null);
+	const [userName, setUserName] = useState<string>("User");
+
+	useEffect(() => {
+		// Fetch user profile data when the component mounts
+		fetch("/api/profile")
+			.then((response) => response.json())
+			.then((data) => {
+				if (data.picture) {
+					setUserImage(data.picture);
+				}
+				if (data.firstName && data.lastName) {
+					setUserName(`${data.firstName} ${data.lastName}`);
+				}
+			})
+			.catch((error) => console.error("Error fetching profile:", error));
+	}, []);
 
 	return (
 		<html lang="en">
@@ -118,16 +136,18 @@ export default function RootLayout({
 							<div>
 								<SidebarLink
 									link={{
-										label: "Himanshu Rawat",
-										href: "#",
-										icon: (
+										label: userName,
+										href: "/profile",
+										icon: userImage ? (
 											<Image
-												src="https://assets.aceternity.com/manu.png"
-												className="h-7 w-7 flex-shrink-0 rounded-full"
+												src={userImage}
+												className="h-7 w-7 flex-shrink-0 rounded-full object-cover"
 												width={50}
 												height={50}
 												alt="Avatar"
 											/>
+										) : (
+											<div className="h-7 w-7 flex-shrink-0 rounded-full bg-gray-300" />
 										),
 									}}
 								/>
@@ -140,6 +160,7 @@ export default function RootLayout({
 						{children}
 					</div>
 				</main>
+				<Toaster />
 			</body>
 		</html>
 	);
